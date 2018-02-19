@@ -4,7 +4,7 @@
   "scripts": {
     "build": "bsb -make-world",
     "watch": "bsb -make-world -w",
-    "serve": "budo src/index.bs.js:build/index.js --live --pushstate --host localhost",
+    "serve": "budo src/Index.bs.js:build/index.js --live --pushstate --host localhost",
     "start": "npm run serve",
     "clean": "bsb -clean-world",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,7 +13,9 @@
     "BuckleScript"
   ],
   "author": "",
-  "dependencies": {},
+  "dependencies": {
+    "@glennsl/bs-json": "^1.1.2"
+  },
   "devDependencies": {
     "bs-platform": "^2.1.0",
     "budo": "^10.0.4"
