@@ -14,7 +14,8 @@
   ],
   "author": "",
   "dependencies": {
-    "@glennsl/bs-json": "^1.1.2"
+    "@glennsl/bs-json": "^1.1.2",
+    "bs-webapi": "^0.8.3"
   },
   "devDependencies": {
     "bs-platform": "^2.1.0",

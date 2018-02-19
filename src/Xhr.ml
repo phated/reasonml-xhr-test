@@ -22,7 +22,7 @@ class type _xmlhttprequest = object
   method send : unit -> unit
   method send__string : string Js.null -> unit
   method send__formdata : FormData.t -> unit
-  method send__document : Document.t -> unit
+  method send__document : Webapi.Dom.Document.t -> unit
   (* method send_blob : Web_blob.t -> unit *)
   (* method send_arrayBufferView : Web_arraybuffer_view.t -> unit *)
   method setRequestHeader : string -> string -> unit
@@ -34,7 +34,7 @@ class type _xmlhttprequest = object
   method response : unresolved Js.null [@@bs.get]
   method responseText : string [@@bs.get]
   method responseURL : string [@@bs.get]
-  method responseXML : Document.t Js.null [@@bs.get]
+  method responseXML : Webapi.Dom.Document.t Js.null [@@bs.get]
   method status : int [@@bs.get]
   method statusText : string [@@bs.get]
   method timeout : float [@@bs.get] [@@bs.set]
@@ -64,7 +64,7 @@ type body =
   | StringBody of string
   | FormDataBody of FormData.t
   | FormListBody of (string * string) list
-  | DocumentBody of Document.t
+  | DocumentBody of Webapi.Dom.Document.t
   (* | BlobBody of Web_blob.t *)
   (* | ArrayBufferViewBody of Web_arraybuffer_view.t *)
 
@@ -73,14 +73,14 @@ type body =
 let abort x = x##abort ()
 
 let getAllResponseHeaders x =
-  let open Result in
+  let open Js.Result in
   match Js.Null.toOption (x##getAllResponseHeaders ()) with
   | None -> Error IncompleteResponse
   | Some "" -> Error NetworkError
   | Some s -> Ok s
 
 let getAllResponseHeadersAsList x =
-  let open Result in
+  let open Js.Result in
   match getAllResponseHeaders x with
   | Error _ as err -> err
   | Ok s -> Ok
@@ -99,10 +99,10 @@ let getAllResponseHeadersAsList x =
 let getAllResponseHeadersAsDict x =
   let module StringMap = Map.Make(String) in
   match getAllResponseHeadersAsList x with
-  | Result.Error _ as err -> err
-  | Result.Ok l ->
+  | Js.Result.Error _ as err -> err
+  | Js.Result.Ok l ->
     let insert d (k, v) = StringMap.add k v d in
-    Result.Ok (List.fold_left insert StringMap.empty l)
+    Js.Result.Ok (List.fold_left insert StringMap.empty l)
 
 let getResponseHeader key x = Js.Null.toOption (x##getResponse key)
 
@@ -154,7 +154,7 @@ type responseBody =
   | StringResponse of string
   | ArrayBufferResponse of unit
   | BlobResponse of unit
-  | DocumentResponse of Document.t
+  | DocumentResponse of Webapi.Dom.Document.t
   | JsonResponse of Js.Json.t
   | TextResponse of string
   | RawResponse of string * unit
