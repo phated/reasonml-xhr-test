@@ -1,0 +1,21 @@
+{
+  "name": "reasonml-xhr-test",
+  "version": "0.0.0",
+  "scripts": {
+    "build": "bsb -make-world",
+    "watch": "bsb -make-world -w",
+    "serve": "budo src/index.bs.js:build/index.js --live --pushstate --host localhost",
+    "start": "npm run serve",
+    "clean": "bsb -clean-world",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "BuckleScript"
+  ],
+  "author": "",
+  "dependencies": {},
+  "devDependencies": {
+    "bs-platform": "^2.1.0",
+    "budo": "^10.0.4"
+  }
+}
