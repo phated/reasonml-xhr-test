@@ -40,14 +40,15 @@ module Event = {
     | Progress
     | Timeout;
 
-  type readystatechange = Js.Json.t;
-  type abort = Js.Json.t;
-  type error = Js.Json.t;
-  type load = Js.Json.t;
-  type loadstart = Js.Json.t;
-  type loadend = Js.Json.t;
-  type progress = Js.Json.t;
-  type timeout = Js.Json.t;
+  /* I think this is a good representation */
+  type readystatechange = Webapi.Dom.Event.t;
+  type abort = Webapi.Dom.Event.t;
+  type error = Webapi.Dom.Event.t;
+  type load = Webapi.Dom.Event.t;
+  type loadstart = Webapi.Dom.Event.t;
+  type loadend = Webapi.Dom.Event.t;
+  type progress = Webapi.Dom.Event.t;
+  type timeout = Webapi.Dom.Event.t;
 };
 
 module XMLHttpRequest = {
@@ -115,6 +116,10 @@ module XMLHttpRequest = {
   [@bs.set] external setWithCredentials : (t, Js.boolean) => unit = "withCredentials";
   [@bs.get] external getWithCredentials : (t) => unit = "withCredentials";
 
+  /* timeout */
+  [@bs.set] external setTimeout : (t, int) => unit = "timeout";
+  [@bs.get] external getTimeout : t => int = "timeout";
+
   /* Read-only but still naming with "get" to be explicit */
   [@bs.get] external getReadyState : t => readyState = "readyState";
   [@bs.get] [@bs.return nullable] external getResponse : t => option(unresolved) = "response";
@@ -146,7 +151,8 @@ let create = (method, url) => {
   make() |> open_(method, url);
 };
 
-let addListener = (evt: Event.t, handler, xhr) => {
+/* Named `set` because you can only assign one value when using `on*` properties */
+let setListener = (evt: Event.t, handler, xhr) => {
   /* Partial the xhr onto the handler so we can define the handlers before our xhr chain */
   let callback = handler(xhr);
   switch evt {
@@ -168,6 +174,12 @@ let send = ((), xhr) => {
   XMLHttpRequest.send(xhr);
   /* Not pipeable - should end pipe chain */
   ();
+};
+
+let setTimeout = (timeout, xhr) => {
+  XMLHttpRequest.setTimeout(xhr, timeout);
+  /* Pipeable */
+  xhr;
 };
 
 let getReadyState = (xhr) => {
@@ -195,7 +207,9 @@ let setResponseType = (responseType, xhr) => {
   | ResponseType.Document => setResponseType("document")
   | ResponseType.Json => setResponseType("json")
   | ResponseType.Raw(raw) => setResponseType(raw)
-  }
+  };
+  /* Pipeable */
+  xhr;
 };
 
 let getResponse = (xhr) => {
@@ -243,5 +257,5 @@ let getResponse = (xhr) => {
     | None => Response.Empty
     };
   }
-}
+  }
 }

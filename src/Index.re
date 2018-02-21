@@ -50,7 +50,9 @@ Js.Promise.(
     |> then_((res) => {
       switch res {
       | Js.Result.Ok(response) => Js.log(response)
-      | Js.Result.Error(err) => Js.log(err)
+      | Js.Result.Error(Request.Error.Timeout) => Js.log("request timed out")
+      | Js.Result.Error(Request.Error.Abort) => Js.log("request aborted")
+      | Js.Result.Error(Request.Error.Network) => Js.log("network error")
       };
       resolve();
     })

@@ -14,6 +14,13 @@
   let values = () => ();
 }; */
 
+module Error = {
+  type t =
+    | Network
+    | Abort
+    | Timeout;
+};
+
 let make = (
   ~meth: string,
   /* ~headers: option(RequestHeaders.t)=?, */
@@ -33,22 +40,23 @@ let make = (
 
     let onLoad = (xhr, _evt) => {
       let response = XHR.getResponse(xhr);
-      let result = switch response {
-      | Empty => Js.Result.Error("Invalid response")
-      | Text(_) | ArrayBuffer(_) | Blob(_) | Document(_) | Json(_) | Raw(_) => Js.Result.Ok(response)
-      };
-      [@bs] resolve(result);
+      [@bs] resolve(Js.Result.Ok(response));
     };
 
     let onAbort = (_xhr, _evt) => {
-      Js.log("on abort");
+      [@bs] resolve(Js.Result.Error(Error.Abort));
     };
 
     let onError = (_xhr, _evt) => {
-      Js.log("on error");
+      [@bs] resolve(Js.Result.Error(Error.Network))
     };
 
-    let onLoadStart = (_xhr, _evt) => {
+    let onTimeout = (_xhr, _evt) => {
+      [@bs] resolve(Js.Result.Error(Error.Timeout));
+    };
+
+    /* Probably don't need these */
+    /* let onLoadStart = (_xhr, _evt) => {
       Js.log("on load start");
     };
 
@@ -58,21 +66,18 @@ let make = (
 
     let onProgress = (_xhr, _evt) => {
       Js.log("on progress");
-    };
-
-    let onTimeout = (_xhr, _evt) => {
-      Js.log("on timeout");
-    };
+    }; */
 
     XHR.create(meth, url)
-      |> XHR.addListener(ReadyStateChange, onReadyStateChange)
-      |> XHR.addListener(Load, onLoad)
-      |> XHR.addListener(Abort, onAbort)
-      |> XHR.addListener(Error, onError)
-      |> XHR.addListener(LoadStart, onLoadStart)
-      |> XHR.addListener(LoadEnd, onLoadEnd)
-      |> XHR.addListener(Progress, onProgress)
-      |> XHR.addListener(Timeout, onTimeout)
+      /* |> XHR.setTimeout(1) */
+      |> XHR.setListener(ReadyStateChange, onReadyStateChange)
+      |> XHR.setListener(Load, onLoad)
+      |> XHR.setListener(Abort, onAbort)
+      |> XHR.setListener(Error, onError)
+      /* |> XHR.setListener(LoadStart, onLoadStart) */
+      /* |> XHR.setListener(LoadEnd, onLoadEnd) */
+      /* |> XHR.setListener(Progress, onProgress) */
+      |> XHR.setListener(Timeout, onTimeout)
       |> XHR.send();
 
     /* XhrRe.setResponseType(Text, xhr); */
