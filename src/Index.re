@@ -1,5 +1,5 @@
 
-let req = Xhr.create();
+/* let req = Xhr.create();
 
 Xhr.open_("get", "https://swapi.co/api/people/1", req);
 
@@ -38,4 +38,20 @@ Xhr.set_onload((_event) => {
   | Some(person) => Js.log(person)
   | None => Js.log("something went wrong")
   }
-}, req);
+}, req); */
+
+/* let reReq = Request.make(); */
+
+let result = Request.get("https://swapi.co/api/people/1/");
+
+
+Js.Promise.(
+  result
+    |> then_((res) => {
+      switch res {
+      | Js.Result.Ok(response) => Js.log(response)
+      | Js.Result.Error(err) => Js.log(err)
+      };
+      resolve();
+    })
+);
