@@ -20,7 +20,7 @@ let make = (
   url
 ) => {
   Js.Promise.make((~resolve, ~reject as _) => {
-    let onreadystatechange = (xhr, _evt) => {
+    let onReadyStateChange = (xhr, _evt) => {
       let readyState = XHR.getReadyState(xhr);
       switch readyState {
       | Unsent => Js.log("Unsent")
@@ -31,7 +31,7 @@ let make = (
       };
     };
 
-    let onload = (xhr, _evt) => {
+    let onLoad = (xhr, _evt) => {
       let response = XHR.getResponse(xhr);
       let result = switch response {
       | Empty => Js.Result.Error("Invalid response")
@@ -40,9 +40,39 @@ let make = (
       [@bs] resolve(result);
     };
 
+    let onAbort = (_xhr, _evt) => {
+      Js.log("on abort");
+    };
+
+    let onError = (_xhr, _evt) => {
+      Js.log("on error");
+    };
+
+    let onLoadStart = (_xhr, _evt) => {
+      Js.log("on load start");
+    };
+
+    let onLoadEnd = (_xhr, _evt) => {
+      Js.log("on load end");
+    };
+
+    let onProgress = (_xhr, _evt) => {
+      Js.log("on progress");
+    };
+
+    let onTimeout = (_xhr, _evt) => {
+      Js.log("on timeout");
+    };
+
     XHR.create(meth, url)
-      |> XHR.addListener(ReadyStateChange, onreadystatechange)
-      |> XHR.addListener(Load, onload)
+      |> XHR.addListener(ReadyStateChange, onReadyStateChange)
+      |> XHR.addListener(Load, onLoad)
+      |> XHR.addListener(Abort, onAbort)
+      |> XHR.addListener(Error, onError)
+      |> XHR.addListener(LoadStart, onLoadStart)
+      |> XHR.addListener(LoadEnd, onLoadEnd)
+      |> XHR.addListener(Progress, onProgress)
+      |> XHR.addListener(Timeout, onTimeout)
       |> XHR.send();
 
     /* XhrRe.setResponseType(Text, xhr); */

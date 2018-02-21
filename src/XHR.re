@@ -45,9 +45,9 @@ module Event = {
   type error = Js.Json.t;
   type load = Js.Json.t;
   type loadstart = Js.Json.t;
+  type loadend = Js.Json.t;
   type progress = Js.Json.t;
   type timeout = Js.Json.t;
-  type loadend = Js.Json.t;
 };
 
 module XMLHttpRequest = {
@@ -79,9 +79,33 @@ module XMLHttpRequest = {
   [@bs.set] external setOnReadyStateChange : (t, eventHandler(Event.readystatechange)) => unit = "onreadystatechange";
   [@bs.get] [@bs.return nullable] external getOnReadyStateChange : t => option(eventHandler(Event.readystatechange)) = "onreadystatechange";
 
+  /* onabort */
+  [@bs.set] external setOnAbort : (t, eventHandler(Event.abort)) => unit = "onabort";
+  [@bs.get] [@bs.return nullable] external getOnAbort : t => option(eventHandler(Event.abort)) = "onabort";
+
+  /* onerror */
+  [@bs.set] external setOnError : (t, eventHandler(Event.error)) => unit = "onerror";
+  [@bs.get] [@bs.return nullable] external getOnError : t => option(eventHandler(Event.error)) = "onerror";
+
   /* onload */
   [@bs.set] external setOnLoad : (t, eventHandler(Event.load)) => unit = "onload";
   [@bs.get] external getOnLoad : t => eventHandler(Event.load) = "onload";
+
+  /* onloadstart */
+  [@bs.set] external setOnLoadStart : (t, eventHandler(Event.loadstart)) => unit = "onloadstart";
+  [@bs.get] external getOnLoadStart : t => eventHandler(Event.loadstart) = "onloadstart";
+
+  /* onloadend */
+  [@bs.set] external setOnLoadEnd : (t, eventHandler(Event.loadend)) => unit = "onloadend";
+  [@bs.get] external getOnLoadEnd : t => eventHandler(Event.loadend) = "onloadend";
+
+  /* onprogress */
+  [@bs.set] external setOnProgress : (t, eventHandler(Event.progress)) => unit = "onprogress";
+  [@bs.get] external getOnProgress : t => eventHandler(Event.progress) = "onprogress";
+
+  /* ontimeout */
+  [@bs.set] external setOnTimeout : (t, eventHandler(Event.timeout)) => unit = "ontimeout";
+  [@bs.get] external getOnTimeout : t => eventHandler(Event.timeout) = "ontimeout";
 
   /* responseType */
   [@bs.set] external setResponseType : (t, string) => unit = "responseType";
@@ -127,7 +151,13 @@ let addListener = (evt: Event.t, handler, xhr) => {
   let callback = handler(xhr);
   switch evt {
   | ReadyStateChange => XMLHttpRequest.setOnReadyStateChange(xhr, callback)
+  | Abort => XMLHttpRequest.setOnAbort(xhr, callback)
+  | Error => XMLHttpRequest.setOnError(xhr, callback)
   | Load => XMLHttpRequest.setOnLoad(xhr, callback)
+  | LoadStart => XMLHttpRequest.setOnLoadStart(xhr, callback)
+  | LoadEnd => XMLHttpRequest.setOnLoadEnd(xhr, callback)
+  | Progress => XMLHttpRequest.setOnProgress(xhr, callback)
+  | Timeout => XMLHttpRequest.setOnTimeout(xhr, callback)
   };
   /* Pipeable */
   xhr;
