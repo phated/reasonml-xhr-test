@@ -42,8 +42,13 @@ Xhr.set_onload((_event) => {
 
 /* let reReq = Request.make(); */
 
-let result = Request.get("https://swapi.co/api/people/1/");
+let abortable = Abortable.make();
 
+/* let result = Request.get(~signal=abortable.signal, "https://swapi.co/api/people/1/"); */
+let result = Request.get(~signal=abortable.signal, "http://localhost:8080/api/organization/undertakerjs/1065786");
+
+/* Js.Global.setTimeout(() => abortable.abort(), 1000); */
+abortable.abort();
 
 Js.Promise.(
   result

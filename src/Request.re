@@ -22,116 +22,106 @@ module Error = {
 };
 
 let make = (
-  ~meth: string,
+  ~meth,
   /* ~headers: option(RequestHeaders.t)=?, */
+  ~timeout=0,
+  /* TODO: This is for parsing (I think), does it belong? */
+  ~responseType=XHR.ResponseType.Text,
+  ~signal: option(Abortable.signal)=?,
   url
 ) => {
+  let aborted = ref(false);
+
   Js.Promise.make((~resolve, ~reject as _) => {
-    let onReadyStateChange = (xhr, _evt) => {
-      let readyState = XHR.getReadyState(xhr);
-      switch readyState {
-      | Unsent => Js.log("Unsent")
-      | Opened => Js.log("Opened")
-      | HeadersReceived => Js.log("Headers Received")
-      | Loading => Js.log("Loading")
-      | Done => Js.log("Done")
+    aborted := switch signal {
+    | Some(signal) => signal.aborted^
+    | None => false
+    };
+
+    if (aborted^) {
+      [@bs] resolve(Js.Result.Error(Error.Abort));
+    } else {
+      let xhr = XHR.create(meth, url);
+
+      /* TODO: Should this be used for anything? */
+      let onReadyStateChange = (_xhr, _evt) => {
+        /* let readyState = XHR.getReadyState(xhr);
+        switch readyState {
+        | Unsent => Js.log("Unsent")
+        | Opened => Js.log("Opened")
+        | HeadersReceived => Js.log("Headers Received")
+        | Loading => Js.log("Loading")
+        | Done => Js.log("Done")
+        }; */
+        ();
+      };
+
+      let onLoad = (xhr, _evt) => {
+        /* TODO: Should HEAD & OPTIONS resolve to something other than an empty body? */
+        let response = XHR.getResponse(xhr);
+        [@bs] resolve(Js.Result.Ok(response));
+      };
+
+      let onAbort = (_xhr, _evt) => [@bs] resolve(Js.Result.Error(Error.Abort));
+      let onError = (_xhr, _evt) => [@bs] resolve(Js.Result.Error(Error.Network));
+      let onTimeout = (_xhr, _evt) => [@bs] resolve(Js.Result.Error(Error.Timeout));
+
+      xhr
+        |> XHR.setTimeout(timeout)
+        |> XHR.setResponseType(responseType)
+        |> XHR.setListener(ReadyStateChange, onReadyStateChange)
+        |> XHR.setListener(Load, onLoad)
+        |> XHR.setListener(Abort, onAbort)
+        |> XHR.setListener(Error, onError)
+        |> XHR.setListener(Timeout, onTimeout)
+        |> XHR.send();
+
+      switch signal {
+      | Some(signal) => signal.listen(() => XHR.abort(xhr))
+      | None => ()
       };
     };
-
-    let onLoad = (xhr, _evt) => {
-      let response = XHR.getResponse(xhr);
-      [@bs] resolve(Js.Result.Ok(response));
-    };
-
-    let onAbort = (_xhr, _evt) => {
-      [@bs] resolve(Js.Result.Error(Error.Abort));
-    };
-
-    let onError = (_xhr, _evt) => {
-      [@bs] resolve(Js.Result.Error(Error.Network))
-    };
-
-    let onTimeout = (_xhr, _evt) => {
-      [@bs] resolve(Js.Result.Error(Error.Timeout));
-    };
-
-    /* Probably don't need these */
-    /* let onLoadStart = (_xhr, _evt) => {
-      Js.log("on load start");
-    };
-
-    let onLoadEnd = (_xhr, _evt) => {
-      Js.log("on load end");
-    };
-
-    let onProgress = (_xhr, _evt) => {
-      Js.log("on progress");
-    }; */
-
-    XHR.create(meth, url)
-      /* |> XHR.setTimeout(1) */
-      |> XHR.setListener(ReadyStateChange, onReadyStateChange)
-      |> XHR.setListener(Load, onLoad)
-      |> XHR.setListener(Abort, onAbort)
-      |> XHR.setListener(Error, onError)
-      /* |> XHR.setListener(LoadStart, onLoadStart) */
-      /* |> XHR.setListener(LoadEnd, onLoadEnd) */
-      /* |> XHR.setListener(Progress, onProgress) */
-      |> XHR.setListener(Timeout, onTimeout)
-      |> XHR.send();
-
-    /* XhrRe.setResponseType(Text, xhr); */
-    /*
-    let responseType = XhrRe.getResponseType(xhr);
-    switch responseType {
-    | Text => Js.log("Text")
-    | Blob => Js.log("Blob")
-    | ArrayBuffer => Js.log("ArrayBuffer")
-    | Document => Js.log("Document")
-    | Json => Js.log("Json")
-    | Raw(raw) => Js.log(raw)
-    }; */
   });
 };
 
-let get = (url) => {
-  let meth = "GET";
+let get = (~timeout=?, ~responseType=?, ~signal=?, url) => {
+  let meth = XHR.Methods.GET;
 
-  make(~meth, url);
+  make(~meth, ~timeout?, ~responseType?, ~signal?, url);
 };
 
-let post = (url) => {
-  let meth = "POST";
+let post = (~timeout=?, url) => {
+  let meth = XHR.Methods.POST;
 
-  make(~meth, url);
+  make(~meth, ~timeout?, url);
 };
 
-let put = (url) => {
-  let meth = "PUT";
+let put = (~timeout=?, url) => {
+  let meth = XHR.Methods.PUT;
 
-  make(~meth, url);
+  make(~meth, ~timeout=?, url);
 };
 
-let patch = (url) => {
-  let meth = "PATCH";
+let patch = (~timeout=?, url) => {
+  let meth = XHR.Methods.PATCH;
 
-  make(~meth, url);
+  make(~meth, ~timeout?, url);
 };
 
-let delete = (url) => {
-  let meth = "DELETE";
+let delete = (~timeout=?, url) => {
+  let meth = XHR.Methods.DELETE;
 
-  make(~meth, url);
+  make(~meth, ~timeout?, url);
 };
 
-let head = (url) => {
-  let meth = "HEAD";
+let head = (~timeout=?, url) => {
+  let meth = XHR.Methods.HEAD;
 
-  make(~meth, url);
+  make(~meth, ~timeout?, url);
 };
 
-let options = (url) => {
-  let meth = "OPTIONS";
+let options = (~timeout=?, url) => {
+  let meth = XHR.Methods.OPTIONS;
 
-  make(~meth, url);
+  make(~meth, ~timeout?, url);
 };

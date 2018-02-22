@@ -8,6 +8,17 @@ type blob;
 /* Aliased types */
 type document = Webapi.Dom.Document.t;
 
+module Methods = {
+  type t =
+    | GET
+    | POST
+    | PUT
+    | PATCH
+    | DELETE
+    | HEAD
+    | OPTIONS;
+};
+
 module ResponseType = {
   type t =
     | Text
@@ -138,8 +149,17 @@ let make = () => {
   XMLHttpRequest.make();
 };
 
-let open_ = (method, url, xhr) => {
-  XMLHttpRequest.open_(xhr, method, url);
+let open_ = (method: Methods.t, url, xhr) => {
+  let methodString = switch method {
+  | GET => "get"
+  | POST => "post"
+  | PUT => "put"
+  | PATCH => "patch"
+  | DELETE => "delete"
+  | HEAD => "head"
+  | OPTIONS => "options"
+  };
+  XMLHttpRequest.open_(xhr, methodString, url);
   /* Pipeable */
   xhr;
 };
@@ -149,6 +169,11 @@ let open_ = (method, url, xhr) => {
 let create = (method, url) => {
   /* Pipeable */
   make() |> open_(method, url);
+};
+
+let abort = (xhr) => {
+  XMLHttpRequest.abort(xhr);
+  /* TODO: Does it make sense for this to be chainable? */
 };
 
 /* Named `set` because you can only assign one value when using `on*` properties */
