@@ -60,38 +60,38 @@ let get = (~timeout=?, ~responseType=?, ~signal=?, url) => {
   make(~meth, ~timeout?, ~responseType?, ~signal?, url);
 };
 
-let post = (~timeout=?, url) => {
+let post = (~timeout=?, ~responseType=?, ~signal=?, url) => {
   let meth = XHR.Methods.POST;
 
-  make(~meth, ~timeout?, url);
+  make(~meth, ~timeout?, ~responseType?, ~signal?, url);
 };
 
-let put = (~timeout=?, url) => {
+let put = (~timeout=?, ~responseType=?, ~signal=?, url) => {
   let meth = XHR.Methods.PUT;
 
-  make(~meth, ~timeout=?, url);
+  make(~meth, ~timeout?, ~responseType?, ~signal?, url);
 };
 
-let patch = (~timeout=?, url) => {
+let patch = (~timeout=?, ~responseType=?, ~signal=?, url) => {
   let meth = XHR.Methods.PATCH;
 
-  make(~meth, ~timeout?, url);
+  make(~meth, ~timeout?, ~responseType?, ~signal?, url);
 };
 
-let delete = (~timeout=?, url) => {
+let delete = (~timeout=?, ~responseType=?, ~signal=?, url) => {
   let meth = XHR.Methods.DELETE;
 
-  make(~meth, ~timeout?, url);
+  make(~meth, ~timeout?, ~responseType?, ~signal?, url);
 };
 
-let head = (~timeout=?, url) => {
+let head = (~timeout=?, ~responseType=?, ~signal=?, url) => {
   let meth = XHR.Methods.HEAD;
 
-  make(~meth, ~timeout?, url);
+  make(~meth, ~timeout?, ~responseType?, ~signal?, url);
 };
 
-let options = (~timeout=?, url) => {
+let options = (~timeout=?, ~responseType=?, ~signal=?, url) => {
   let meth = XHR.Methods.OPTIONS;
 
-  make(~meth, ~timeout?, url);
+  make(~meth, ~timeout?, ~responseType?, ~signal?, url);
 };
