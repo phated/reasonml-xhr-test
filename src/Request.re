@@ -29,7 +29,8 @@ let make = (
 
       let onLoad = (xhr, _evt) => {
         /* TODO: Should HEAD & OPTIONS resolve to something other than an empty body? */
-        let response = XHR.getResponse(xhr);
+        let xhrResponse = XHR.getResponse(xhr);
+        let response = Response.fromXHR(xhrResponse);
         [@bs] resolve(Js.Result.Ok(response));
       };
 
