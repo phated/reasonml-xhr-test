@@ -1,19 +1,3 @@
-
-/* module RequestHeaders = {
-  type t;
-
-  let make = () => ();
-
-  let append = () => ();
-  let delete = () => ();
-  let entries = () => ();
-  let get = () => ();
-  let has = () => ();
-  let keys = () => ();
-  let set = () => ();
-  let values = () => ();
-}; */
-
 module Error = {
   type t =
     | Network
@@ -43,19 +27,6 @@ let make = (
     } else {
       let xhr = XHR.create(meth, url);
 
-      /* TODO: Should this be used for anything? */
-      let onReadyStateChange = (_xhr, _evt) => {
-        /* let readyState = XHR.getReadyState(xhr);
-        switch readyState {
-        | Unsent => Js.log("Unsent")
-        | Opened => Js.log("Opened")
-        | HeadersReceived => Js.log("Headers Received")
-        | Loading => Js.log("Loading")
-        | Done => Js.log("Done")
-        }; */
-        ();
-      };
-
       let onLoad = (xhr, _evt) => {
         /* TODO: Should HEAD & OPTIONS resolve to something other than an empty body? */
         let response = XHR.getResponse(xhr);
@@ -69,7 +40,6 @@ let make = (
       xhr
         |> XHR.setTimeout(timeout)
         |> XHR.setResponseType(responseType)
-        |> XHR.setListener(ReadyStateChange, onReadyStateChange)
         |> XHR.setListener(Load, onLoad)
         |> XHR.setListener(Abort, onAbort)
         |> XHR.setListener(Error, onError)
